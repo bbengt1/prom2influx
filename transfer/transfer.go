@@ -9,8 +9,8 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/influxdata/influxdb1-client"
-	"github.com/prometheus/client_golang/api/prometheus/v1"
+	client "github.com/influxdata/influxdb1-client"
+	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
 	"github.com/prometheus/common/model"
 )
 
@@ -41,11 +41,15 @@ type Trans struct {
 }
 
 func (t *Trans) Run(ctx context.Context) error {
-	names, warn, err := t.p.LabelValues(ctx, "__name__")
-	_ = warn
-	if err != nil {
-		return err
+	names := []model.LabelValues{
+		{"container_cpu_usage_seconds"},
+		{"kube_pod_container_resource_requests_cpu_cores"},
 	}
+	// names, warn, err := t.p.LabelValues(ctx, "__name__")
+	// _ = warn
+	// if err != nil {
+	// 	return err
+	// }
 	if t.End.IsZero() {
 		t.End = time.Now()
 	}
