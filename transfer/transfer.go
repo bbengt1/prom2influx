@@ -41,11 +41,12 @@ type Trans struct {
 }
 
 func (t *Trans) Run(ctx context.Context) error {
-	names := []model.LabelValues{
-		{"container_cpu_usage_seconds"},
-		{"kube_pod_container_resource_requests_cpu_cores"},
+	names := model.LabelValues{
+		"container_cpu_usage_seconds",
+		"kube_pod_container_resource_requests_cpu_cores",
 	}
-	// names, warn, err := t.p.LabelValues(ctx, "__name__")
+	var err error
+	//names, warn, err := t.p.LabelValues(ctx, "__name__")
 	// _ = warn
 	// if err != nil {
 	// 	return err
