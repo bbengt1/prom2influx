@@ -42,7 +42,7 @@ type Trans struct {
 
 func (t *Trans) Run(ctx context.Context) error {
 	names := model.LabelValues{
-		"container_cpu_usage_seconds",
+		"container_cpu_usage_seconds_total",
 		"kube_pod_container_resource_requests_cpu_cores",
 	}
 	var err error
