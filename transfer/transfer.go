@@ -44,6 +44,11 @@ func (t *Trans) Run(ctx context.Context) error {
 	names := model.LabelValues{
 		"container_cpu_usage_seconds_total",
 		"kube_pod_container_resource_requests_cpu_cores",
+		"kube_pod_container_resource_requests_memory_bytes",
+		"container_memory_usage_bytes",
+		"kube_persistentvolumeclaim_resource_requests_storage_bytes",
+		"kube_persistentvolumeclaim_info",
+		"kube_persistentvolume_labels",
 	}
 	var err error
 	//names, warn, err := t.p.LabelValues(ctx, "__name__")
@@ -152,15 +157,25 @@ func (t *Trans) valueToInfluxdb(name string, v model.Value) (bps []client.BatchP
 			bp := client.BatchPoints{
 				Database:  t.Database,
 				Tags:      metricToTag(i.Metric),
-				Precision: "n",
+				Precision: "ns",
 			}
 			for _, j := range i.Values {
-				t := j.Timestamp.Time()
+				tt := j.Timestamp.Time()
+				// fmt.Println(tt)
+				// ts := j.Timestamp.Unix()
+				// fmt.Println(ts)
+				// i, err := strconv.ParseInt(tt, 10, 64)
+				// if err != nil {
+				//  	fmt.Println("Oops:", err)
+
+				//  }
+				// t := time.Unix(i, 0)
 				bp.Points = append(bp.Points, client.Point{
 					Tags:        externalLabels,
 					Measurement: name,
-					Time:        t,
+					Time:        tt,
 					Fields:      map[string]interface{}{"value": float64(j.Value)},
+					Precision:   "ns",
 				})
 			}
 			bps = append(bps, bp)
@@ -172,7 +187,7 @@ func (t *Trans) valueToInfluxdb(name string, v model.Value) (bps []client.BatchP
 				Measurement: name,
 				Tags:        externalLabels,
 				Fields:      map[string]interface{}{"value": float64(v.Value)},
-				Precision:   "n",
+				Precision:   "ns",
 			}},
 			Database: t.Database,
 			Time:     v.Timestamp.Time().Add(-(time.Hour * 24 * 15)),
@@ -181,7 +196,7 @@ func (t *Trans) valueToInfluxdb(name string, v model.Value) (bps []client.BatchP
 		v := v.(model.Vector)
 		bp := client.BatchPoints{
 			Database:  t.Database,
-			Precision: "n",
+			Precision: "ns",
 		}
 		for _, i := range v {
 			tags := metricToTag(i.Metric)
@@ -204,7 +219,7 @@ func (t *Trans) valueToInfluxdb(name string, v model.Value) (bps []client.BatchP
 				Tags:        externalLabels,
 
 				Fields:    map[string]interface{}{"value": string(v.Value)},
-				Precision: "ms",
+				Precision: "ns",
 			}},
 			Database: t.Database,
 			Time:     v.Timestamp.Time(),

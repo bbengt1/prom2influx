@@ -1,0 +1,1 @@
+./prom2influx --influxdb-url="http://cn000018943:8086" --prometheus-url="http://apvrp27508.uhc.com:9090" --influxdb.database="prometheusfed" --start="2020-12-27T00:00:00.000000-00:00" --end="2020-12-28T00:00:00.000000-00:00

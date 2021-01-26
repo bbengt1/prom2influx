@@ -9,10 +9,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/influxdata/influxdb1-client"
+	client "github.com/influxdata/influxdb1-client"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/api"
-	"github.com/prometheus/client_golang/api/prometheus/v1"
+	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
 	"gopkg.in/alecthomas/kingpin.v2"
 
 	"github.com/zhyon404/prom2influx/transfer"
@@ -82,9 +82,10 @@ func main() {
 	// NOTE: this assumes you've setup a user and have setup shell env variables,
 	// namely INFLUX_USER/INFLUX_PWD. If not just omit Username/Password below.
 	conf := client.Config{
-		URL:      *host,
-		Username: os.Getenv("INFLUX_USER"),
-		Password: os.Getenv("INFLUX_PWD"),
+		URL:       *host,
+		Username:  os.Getenv("INFLUX_USER"),
+		Password:  os.Getenv("INFLUX_PWD"),
+		Precision: "ns",
 	}
 	con, err := client.NewClient(conf)
 	if err != nil {
