@@ -127,7 +127,7 @@ func (t *Trans) runOne(name string) error {
 		})
 		_ = warn
 		if err != nil {
-			panic("")
+			panic(err)
 			return err
 		}
 		bps := t.valueToInfluxdb(name, v)
