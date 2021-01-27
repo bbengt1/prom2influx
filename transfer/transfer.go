@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"io/ioutil"
 	"log"
 	"strconv"
 	"sync"
@@ -152,7 +151,7 @@ func (t *Trans) runOne(name string) error {
 					b.WriteByte('\n')
 				}
 
-				ioutil.WriteFile("/Users/bbengt1/go/src/github.optum.com/bbengt1/prom2influx/temp/test.txt", b.Bytes(), 0644)
+				//ioutil.WriteFile("/Users/bbengt1/go/src/github.optum.com/bbengt1/prom2influx/temp/test.txt", b.Bytes(), 0644)
 			}
 			var err error
 			for try := 0; try <= t.Retry; try++ {
@@ -180,7 +179,7 @@ func (t *Trans) valueToInfluxdb(name string, v model.Value) (bps []client.BatchP
 			bp := client.BatchPoints{
 				Database:  t.Database,
 				Tags:      metricToTag(i.Metric),
-				Precision: "s",
+				Precision: "ns",
 			}
 			for _, j := range i.Values {
 				tt := j.Timestamp.Time()
@@ -198,7 +197,7 @@ func (t *Trans) valueToInfluxdb(name string, v model.Value) (bps []client.BatchP
 					Measurement: name,
 					Time:        tt,
 					Fields:      map[string]interface{}{"value": float64(j.Value)},
-					Precision:   "s",
+					Precision:   "ns",
 				})
 			}
 			bps = append(bps, bp)
