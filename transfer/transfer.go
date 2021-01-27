@@ -1,8 +1,10 @@
 package transfer
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"strconv"
 	"sync"
@@ -131,6 +133,27 @@ func (t *Trans) runOne(name string) error {
 		}
 		bps := t.valueToInfluxdb(name, v)
 		for _, i := range bps {
+			{
+				var b bytes.Buffer
+				for _, p := range i.Points {
+					if p.Raw != "" {
+						_, _ = b.WriteString(p.Raw)
+					} else {
+						for k, v := range i.Tags {
+							if p.Tags == nil {
+								p.Tags = make(map[string]string, len(i.Tags))
+							}
+							p.Tags[k] = v
+						}
+
+						b.WriteString(p.MarshalString())
+					}
+
+					b.WriteByte('\n')
+				}
+
+				ioutil.WriteFile("/Users/bbengt1/go/src/github.optum.com/bbengt1/prom2influx/temp/test.txt", b.Bytes(), 0644)
+			}
 			var err error
 			for try := 0; try <= t.Retry; try++ {
 				_, err = t.i.Write(i)
@@ -157,7 +180,7 @@ func (t *Trans) valueToInfluxdb(name string, v model.Value) (bps []client.BatchP
 			bp := client.BatchPoints{
 				Database:  t.Database,
 				Tags:      metricToTag(i.Metric),
-				Precision: "ns",
+				Precision: "s",
 			}
 			for _, j := range i.Values {
 				tt := j.Timestamp.Time()
@@ -175,7 +198,7 @@ func (t *Trans) valueToInfluxdb(name string, v model.Value) (bps []client.BatchP
 					Measurement: name,
 					Time:        tt,
 					Fields:      map[string]interface{}{"value": float64(j.Value)},
-					Precision:   "ns",
+					Precision:   "s",
 				})
 			}
 			bps = append(bps, bp)
