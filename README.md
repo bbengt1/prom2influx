@@ -32,6 +32,8 @@ Flags:
       --step=1m            The step
       --c=1                The connections
       --retry=3            The retry
+      --precision          The time stamp precision, ns,u,ms,s,m,h
+      --metrics            A comma delimited list of the metrics you want to migrate (container_cpu_usage_seconds_total,kube_pod_container_resource_requests_cpu_cores)
 ```
 
 an example would be:
