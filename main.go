@@ -56,7 +56,7 @@ func parseFlags() *config {
 		Default("1").IntVar(&cfg.c)
 	a.Flag("retry", "The retry").
 		Default("3").IntVar(&cfg.retry)
-	a.Flag("metrics", "The named metrics you wish to import into Influx").
+	a.Flag("metrics", "A comma delimited list of the metrics you want to migrate (container_cpu_usage_seconds_total,kube_pod_container_resource_requests_cpu_cores)").
 		Default("").StringVar(&cfg.metrics)
 	a.Flag("precision", "The time stamp precision, ns,u,ms,s,m,h").
 		Default("ns").StringVar(&cfg.metrics)
