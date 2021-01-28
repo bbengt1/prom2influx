@@ -28,6 +28,8 @@ type config struct {
 	step             time.Duration
 	c                int
 	retry            int
+	metrics          string
+	precision        string
 }
 
 func parseFlags() *config {
@@ -54,6 +56,10 @@ func parseFlags() *config {
 		Default("1").IntVar(&cfg.c)
 	a.Flag("retry", "The retry").
 		Default("3").IntVar(&cfg.retry)
+	a.Flag("metrics", "The named metrics you wish to import into Influx").
+		Default("").StringVar(&cfg.metrics)
+	a.Flag("precision", "The time stamp precision, ns,u,ms,s,m,h").
+		Default("ns").StringVar(&cfg.metrics)
 
 	_, err := a.Parse(os.Args[1:])
 	if err != nil {
@@ -85,7 +91,7 @@ func main() {
 		URL:       *host,
 		Username:  os.Getenv("INFLUX_USER"),
 		Password:  os.Getenv("INFLUX_PWD"),
-		Precision: "ns",
+		Precision: cfg.precision,
 	}
 	con, err := client.NewClient(conf)
 	if err != nil {
@@ -96,6 +102,6 @@ func main() {
 		Address: cfg.prometheusURL,
 	})
 	api := v1.NewAPI(c)
-	t := transfer.NewTrans(cfg.influxdbDatabase, start, end, cfg.step, api, con, cfg.c, cfg.retry, cfg.monitorLabel)
+	t := transfer.NewTrans(cfg.influxdbDatabase, start, end, cfg.step, api, con, cfg.c, cfg.retry, cfg.monitorLabel, cfg.precision, cfg.metrics)
 	log.Fatalln(t.Run(context.Background()))
 }

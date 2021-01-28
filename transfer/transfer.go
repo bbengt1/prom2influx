@@ -15,7 +15,7 @@ import (
 	"github.com/prometheus/common/model"
 )
 
-func NewTrans(database string, start, end time.Time, step time.Duration, p v1.API, i *client.Client, c, retry int, monitorLabel string) *Trans {
+func NewTrans(database string, start, end time.Time, step time.Duration, p v1.API, i *client.Client, c, retry int, monitorLabel string, precision string, metrics string) *Trans {
 	return &Trans{
 		Database:     database,
 		Start:        start,
@@ -26,6 +26,8 @@ func NewTrans(database string, start, end time.Time, step time.Duration, p v1.AP
 		C:            c,
 		Retry:        retry,
 		MonitorLabel: monitorLabel,
+		Precision:    precision,
+		Metrics:      metrics,
 	}
 }
 
@@ -39,19 +41,24 @@ type Trans struct {
 	C            int
 	Retry        int
 	MonitorLabel string
+	Precision    string
+	Metrics      string
 }
 
 func (t *Trans) Run(ctx context.Context) error {
-	names := model.LabelValues{
-		"container_cpu_usage_seconds_total",
-		"kube_pod_container_resource_requests_cpu_cores",
-		"kube_pod_container_resource_requests_memory_bytes",
-		"container_memory_usage_bytes",
-		"kube_persistentvolumeclaim_resource_requests_storage_bytes",
-		"kube_persistentvolumeclaim_info",
-		"kube_persistentvolume_labels",
-	}
+
+	var names model.LabelValues
 	var err error
+	if t.Metrics == "" {
+
+		names, _, err = t.p.LabelValues(ctx, "__name__")
+		if err != nil {
+			return err
+		}
+	} else {
+		names = model.LabelValues{model.LabelValue(t.Metrics)}
+	}
+
 	//names, warn, err := t.p.LabelValues(ctx, "__name__")
 	// _ = warn
 	// if err != nil {
@@ -181,7 +188,7 @@ func (t *Trans) valueToInfluxdb(name string, v model.Value) (bps []client.BatchP
 			bp := client.BatchPoints{
 				Database:  t.Database,
 				Tags:      metricToTag(i.Metric),
-				Precision: "ns",
+				Precision: t.Precision,
 			}
 			for _, j := range i.Values {
 				tt := j.Timestamp.Time()
@@ -199,7 +206,7 @@ func (t *Trans) valueToInfluxdb(name string, v model.Value) (bps []client.BatchP
 					Measurement: name,
 					Time:        tt,
 					Fields:      map[string]interface{}{"value": float64(j.Value)},
-					Precision:   "ns",
+					Precision:   t.Precision,
 				})
 			}
 			bps = append(bps, bp)
@@ -211,7 +218,7 @@ func (t *Trans) valueToInfluxdb(name string, v model.Value) (bps []client.BatchP
 				Measurement: name,
 				Tags:        externalLabels,
 				Fields:      map[string]interface{}{"value": float64(v.Value)},
-				Precision:   "ns",
+				Precision:   t.Precision,
 			}},
 			Database: t.Database,
 			Time:     v.Timestamp.Time().Add(-(time.Hour * 24 * 15)),
@@ -220,7 +227,7 @@ func (t *Trans) valueToInfluxdb(name string, v model.Value) (bps []client.BatchP
 		v := v.(model.Vector)
 		bp := client.BatchPoints{
 			Database:  t.Database,
-			Precision: "ns",
+			Precision: t.Precision,
 		}
 		for _, i := range v {
 			tags := metricToTag(i.Metric)
@@ -243,7 +250,7 @@ func (t *Trans) valueToInfluxdb(name string, v model.Value) (bps []client.BatchP
 				Tags:        externalLabels,
 
 				Fields:    map[string]interface{}{"value": string(v.Value)},
-				Precision: "ns",
+				Precision: t.Precision,
 			}},
 			Database: t.Database,
 			Time:     v.Timestamp.Time(),
