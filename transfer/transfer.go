@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"log"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 	"unsafe"
@@ -51,7 +52,9 @@ func (t *Trans) Run(ctx context.Context) error {
 	var err error
 	if t.Metrics == "" {
 
-		names, _, err = t.p.LabelValues(ctx, "__name__")
+		for _, l := range strings.Split(t.Metrics, ",") {
+			names = append(names, model.LabelValue(l))
+		}
 		if err != nil {
 			return err
 		}
@@ -59,11 +62,6 @@ func (t *Trans) Run(ctx context.Context) error {
 		names = model.LabelValues{model.LabelValue(t.Metrics)}
 	}
 
-	//names, warn, err := t.p.LabelValues(ctx, "__name__")
-	// _ = warn
-	// if err != nil {
-	// 	return err
-	// }
 	if t.End.IsZero() {
 		t.End = time.Now()
 	}
