@@ -119,7 +119,7 @@ func (t *Trans) runOne(name string) error {
 	for start.Before(finish) {
 		end := start.Add(t.Step * 60 * 1)
 		log.Println("one...", start.Format(time.RFC3339), end.Format(time.RFC3339))
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
 		defer cancel()
 		v, warn, err := t.p.QueryRange(ctx, name, v1.Range{
 			Start: start,
@@ -127,6 +127,7 @@ func (t *Trans) runOne(name string) error {
 			Step:  t.Step,
 		})
 		_ = warn
+		//log.Printf(err.Error())
 		if err != nil {
 			panic(err)
 			return err
