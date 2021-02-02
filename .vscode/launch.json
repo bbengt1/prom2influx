@@ -11,7 +11,8 @@
             "mode": "debug",
             "program": "${workspaceFolder}/main.go",
             "args": ["--influxdb-url", "http://cn000018943:8086", "--prometheus-url", "http://apvrp27508.uhc.com:9090", "--influxdb.database",
-                "prometheusfed", "--start", "2020-12-27T00:00:00.000000-00:00", "--end", "2020-12-28T00:00:00.000000-00:00"]
+                "prometheusfed", "--start", "2021-01-31T00:00:00.000000-00:00", "--end", "2020-02-01T00:00:00.000000-00:00", "--precision", "ns",
+                "metrics","container_cpu_usage_seconds_total,kube_pod_container_resource_requests_cpu_cores"]
         }
     ]
 }
