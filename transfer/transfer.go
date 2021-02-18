@@ -51,15 +51,15 @@ func (t *Trans) Run(ctx context.Context) error {
 	var names model.LabelValues
 	var err error
 	if t.Metrics == "" {
+		names = model.LabelValues{model.LabelValue(t.Metrics)}
 
+	} else {
 		for _, l := range strings.Split(t.Metrics, ",") {
 			names = append(names, model.LabelValue(l))
 		}
 		if err != nil {
 			return err
 		}
-	} else {
-		names = model.LabelValues{model.LabelValue(t.Metrics)}
 	}
 
 	if t.End.IsZero() {
