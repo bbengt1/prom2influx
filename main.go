@@ -52,9 +52,9 @@ func parseFlags() *config {
 		Default("").StringVar(&cfg.end)
 	a.Flag("step", "The step").
 		Default("1m").DurationVar(&cfg.step)
-	a.Flag("c", "The connections").
+	a.Flag("c", "The number of connections").
 		Default("1").IntVar(&cfg.c)
-	a.Flag("retry", "The retry").
+	a.Flag("retry", "The number os retries").
 		Default("3").IntVar(&cfg.retry)
 	a.Flag("metrics", "A comma delimited list of the metrics you want to migrate (container_cpu_usage_seconds_total,kube_pod_container_resource_requests_cpu_cores)").
 		Default("").StringVar(&cfg.metrics)
